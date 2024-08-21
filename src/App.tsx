@@ -36,7 +36,13 @@ function App() {
     const splittedISIText = ISI.split(/\r?\n|\r/);
 
     splittedISIText.forEach((text) => {
-      generatedISIRows += `<tr>\n\t<td width="${gutterWidth ? gutterWidth : "30px"}" class="gutter">&nbsp;</td>\n\t<td align="left" style="font-family: Arial, Helvetica, sans-serif; font-size: ${fontSize ? fontSize : "12px"}; line-height: ${lineHeight ? lineHeight : "16px"}; color: ${fontColor ? fontColor : "#000000"}; padding-bottom: ${padding ? padding : "10px"};font-weight: ${text.startsWith("**") ? "bold" : "normal"};">\n\t\t${text.startsWith("**") ? text.substring(2) : text}\n\t</td>\n\t<td width="${gutterWidth ? gutterWidth : "30px"}" class="gutter">&nbsp;</td>\n</tr>\n`;
+      if (text.startsWith("**")) {
+        generatedISIRows += `<tr>\n\t<td width="${gutterWidth ? gutterWidth : "30px"}" class="gutter">&nbsp;</td>\n\t<td align="left" style="font-family: Arial, Helvetica, sans-serif; font-size: ${fontSize ? fontSize : "12px"}; line-height: ${lineHeight ? lineHeight : "16px"}; color: ${fontColor ? fontColor : "#000000"}; padding-bottom: ${padding ? padding : "10px"};font-weight: bold;">\n\t\t${text.substring(2)}\n\t</td>\n\t<td width="${gutterWidth ? gutterWidth : "30px"}" class="gutter">&nbsp;</td>\n</tr>\n`;
+      } else if (text.startsWith("-")) {
+        generatedISIRows += `<tr>\n\t<td width="${gutterWidth ? gutterWidth : "30px"}" class="gutter">&nbsp;</td>\n\t<td align="left" style="font-family: Arial, Helvetica, sans-serif; font-size: ${fontSize ? fontSize : "12px"}; line-height: ${lineHeight ? lineHeight : "16px"}; color: ${fontColor ? fontColor : "#000000"}; padding-bottom: ${padding ? padding : "10px"};font-weight: normal;">\n\t\t<table cellpadding="0" cellspacing="0" border="0" width="100%">\n\t\t\t<tr>\n\t\t\t\t<td width="12" valign="top" align="left" style="font-family: sans-serif; font-size: ${fontSize ? fontSize : "12px"}; line-height: ${lineHeight ? lineHeight : "16px"}; color: #000000; font-weight: bold; padding-bottom: ${padding ? padding : "10px"};">&bull;</td>\n\t\t\t\t<td width="12" valign="top" align="left" style="font-family: sans-serif; font-size: ${fontSize ? fontSize : "12px"}; line-height: ${lineHeight ? lineHeight : "16px"}; color: #000000; font-weight: bold; padding-bottom: ${padding ? padding : "10px"};">${text.substring(1)}</td>\n\t\t\t</tr>\n\t\t</table>\n\t</td>\n\t<td width="${gutterWidth ? gutterWidth : "30px"}" class="gutter">&nbsp;</td>\n</tr>\n`;
+      } else {
+        generatedISIRows += `<tr>\n\t<td width="${gutterWidth ? gutterWidth : "30px"}" class="gutter">&nbsp;</td>\n\t<td align="left" style="font-family: Arial, Helvetica, sans-serif; font-size: ${fontSize ? fontSize : "12px"}; line-height: ${lineHeight ? lineHeight : "16px"}; color: ${fontColor ? fontColor : "#000000"}; padding-bottom: ${padding ? padding : "10px"};font-weight: normal;">\n\t\t${text}\n\t</td>\n\t<td width="${gutterWidth ? gutterWidth : "30px"}" class="gutter">&nbsp;</td>\n</tr>\n`;
+      }
     });
 
     setIsClipboardWritten(false);
@@ -75,9 +81,9 @@ function App() {
             (**) - Text with font weight set as <strong>bold</strong>.
           </h3>
 
-          <div className="flex max-w-full flex-col gap-6 md:flex-row">
+          <div className="flex w-full flex-col justify-center gap-6 md:flex-row">
             <form
-              className="max-w-full gap-2 md:grid md:max-w-96 md:grid-cols-2"
+              className="gap-2 md:grid md:w-1/2 md:grid-cols-2"
               onSubmit={handleSubmit(handleISIValues)}
             >
               <div className="col-span-2 mb-3 space-y-1 md:mb-0 md:space-y-2">
@@ -145,17 +151,19 @@ function App() {
             </form>
 
             {generatedISI && (
-              <div className="relative max-h-[600px] flex-1 overflow-y-auto rounded-md border-2 p-4 pt-8 scrollbar scrollbar-track-transparent scrollbar-thumb-slate-800 md:pt-6">
+              <div className="relative flex max-h-[580px] md:w-1/2">
                 <Button
                   size="icon"
                   variant="outline"
-                  className="absolute right-2 top-2"
+                  className="absolute right-2 top-2 md:right-6"
                   onClick={copyTextToClipboard}
                   title="Copy to clipboard"
                 >
                   {isClipboardWritten ? <ClipboardCheck /> : <ClipboardList />}
                 </Button>
-                <pre>{generatedISI}</pre>
+                <div className="overflow-y-auto rounded-md border-2 p-4 pt-8 scrollbar scrollbar-track-transparent scrollbar-thumb-slate-800 md:pt-6">
+                  <pre>{generatedISI}</pre>
+                </div>
               </div>
             )}
           </div>
