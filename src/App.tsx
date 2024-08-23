@@ -19,8 +19,8 @@ type ISIValuesSchema = {
 };
 
 function App() {
-  const [generatedISI, setGeneratedISI] = useState<string>("");
-  const [isClipboardWritten, setIsClipboardWritten] = useState<boolean>(false);
+  const [generatedISI, setGeneratedISI] = useState("");
+  const [isClipboardWritten, setIsClipboardWritten] = useState(false);
   const { register, handleSubmit } = useForm<ISIValuesSchema>();
   const { toast } = useToast();
 
@@ -78,7 +78,7 @@ function App() {
 
         <div className="container flex flex-col items-center justify-center px-4 py-8">
           <h1 className="mb-4 text-center text-2xl font-bold lg:text-4xl">
-            ISI HTML Generator
+            ISI Generator
           </h1>
 
           <h3 className="mb-3 font-thin text-foreground">
@@ -165,8 +165,8 @@ function App() {
                 >
                   {isClipboardWritten ? <ClipboardCheck /> : <ClipboardList />}
                 </Button>
-                <div className="overflow-y-auto rounded-md border-2 p-4 pt-8 scrollbar scrollbar-track-transparent scrollbar-thumb-slate-800 md:pt-6">
-                  <pre>{generatedISI}</pre>
+                <div className="overflow-y-auto rounded-md border-2 p-4 pt-8 scrollbar scrollbar-track-transparent scrollbar-thumb-zinc-800 md:pt-6">
+                  <pre className="text-xs">{generatedISI}</pre>
                 </div>
               </div>
             )}
