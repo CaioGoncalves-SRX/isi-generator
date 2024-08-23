@@ -19,9 +19,9 @@ type ISIValuesSchema = {
 };
 
 function App() {
-  const { register, handleSubmit } = useForm<ISIValuesSchema>();
   const [generatedISI, setGeneratedISI] = useState<string>("");
   const [isClipboardWritten, setIsClipboardWritten] = useState<boolean>(false);
+  const { register, handleSubmit } = useForm<ISIValuesSchema>();
   const { toast } = useToast();
 
   function handleISIValues({
@@ -38,9 +38,13 @@ function App() {
     splittedISIText.forEach((text) => {
       if (text.startsWith("**")) {
         generatedISIRows += `<tr>\n\t<td width="${gutterWidth ? gutterWidth : "30px"}" class="gutter">&nbsp;</td>\n\t<td align="left" style="font-family: Arial, Helvetica, sans-serif; font-size: ${fontSize ? fontSize : "12px"}; line-height: ${lineHeight ? lineHeight : "16px"}; color: ${fontColor ? fontColor : "#000000"}; padding-bottom: ${padding ? padding : "10px"};font-weight: bold;">\n\t\t${text.substring(2)}\n\t</td>\n\t<td width="${gutterWidth ? gutterWidth : "30px"}" class="gutter">&nbsp;</td>\n</tr>\n`;
-      } else if (text.startsWith("-")) {
+      }
+
+      if (text.startsWith("-")) {
         generatedISIRows += `<tr>\n\t<td width="${gutterWidth ? gutterWidth : "30px"}" class="gutter">&nbsp;</td>\n\t<td align="left" style="font-family: Arial, Helvetica, sans-serif; font-size: ${fontSize ? fontSize : "12px"}; line-height: ${lineHeight ? lineHeight : "16px"}; color: ${fontColor ? fontColor : "#000000"}; padding-bottom: ${padding ? padding : "10px"};font-weight: normal;">\n\t\t<table cellpadding="0" cellspacing="0" border="0" width="100%">\n\t\t\t<tr>\n\t\t\t\t<td width="12" valign="top" align="left" style="font-family: sans-serif; font-size: ${fontSize ? fontSize : "12px"}; line-height: ${lineHeight ? lineHeight : "16px"}; color: #000000; font-weight: bold; padding-bottom: ${padding ? padding : "10px"};">&bull;</td>\n\t\t\t\t<td width="12" valign="top" align="left" style="font-family: sans-serif; font-size: ${fontSize ? fontSize : "12px"}; line-height: ${lineHeight ? lineHeight : "16px"}; color: #000000; font-weight: bold; padding-bottom: ${padding ? padding : "10px"};">${text.substring(1)}</td>\n\t\t\t</tr>\n\t\t</table>\n\t</td>\n\t<td width="${gutterWidth ? gutterWidth : "30px"}" class="gutter">&nbsp;</td>\n</tr>\n`;
-      } else {
+      }
+
+      if (!text.startsWith("**") && !text.startsWith("-")) {
         generatedISIRows += `<tr>\n\t<td width="${gutterWidth ? gutterWidth : "30px"}" class="gutter">&nbsp;</td>\n\t<td align="left" style="font-family: Arial, Helvetica, sans-serif; font-size: ${fontSize ? fontSize : "12px"}; line-height: ${lineHeight ? lineHeight : "16px"}; color: ${fontColor ? fontColor : "#000000"}; padding-bottom: ${padding ? padding : "10px"};font-weight: normal;">\n\t\t${text}\n\t</td>\n\t<td width="${gutterWidth ? gutterWidth : "30px"}" class="gutter">&nbsp;</td>\n</tr>\n`;
       }
     });
