@@ -8,20 +8,46 @@ import { Textarea } from "./components/ui/textarea";
 import { useState } from "react";
 import { ClipboardCheck, ClipboardList } from "lucide-react";
 import { useToast } from "./components/ui/use-toast";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-type ISIValuesSchema = {
-  padding: string;
-  fontSize: string;
-  fontColor: string;
-  lineHeight: string;
-  gutterWidth: string;
-  ISI: string;
-};
+const ISIValuesSchema = z.object({
+  padding: z.coerce
+    .number({ message: "Padding needs to be a number" })
+    .optional(),
+  fontSize: z.coerce
+    .number({ message: "Font size needs to be a number" })
+    .optional(),
+  fontColor: z
+    .string()
+    .regex(
+      /^(#[a-f0-9]{6}|#[a-f0-9]{3}|rgb *\( *[0-9]{1,3}%? *, *[0-9]{1,3}%? *, *[0-9]{1,3}%? *\)|rgba *\( *[0-9]{1,3}%? *, *[0-9]{1,3}%? *, *[0-9]{1,3}%? *, *[0-9]{1,3}%? *\)|black|green|silver|gray|olive|white|yellow|maroon|navy|red|blue|purple|teal|fuchsia|aqua)$/i,
+      {
+        message: "Font color needs to be a valid color.",
+      },
+    )
+    .optional(),
+  lineHeight: z.coerce
+    .number({ message: "Line height needs to be a number" })
+    .optional(),
+  gutterWidth: z.coerce
+    .number({ message: "Gutter needs to be a number" })
+    .optional(),
+  ISI: z.string().min(1),
+});
+
+type ISIValues = z.infer<typeof ISIValuesSchema>;
 
 function App() {
   const [generatedISI, setGeneratedISI] = useState("");
   const [isClipboardWritten, setIsClipboardWritten] = useState(false);
-  const { register, handleSubmit } = useForm<ISIValuesSchema>();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ISIValues>({
+    resolver: zodResolver(ISIValuesSchema),
+  });
   const { toast } = useToast();
 
   function handleISIValues({
@@ -31,21 +57,21 @@ function App() {
     lineHeight,
     gutterWidth,
     ISI,
-  }: ISIValuesSchema) {
+  }: ISIValues) {
     let generatedISIRows = "";
     const splittedISIText = ISI.split(/\r?\n|\r/);
 
     splittedISIText.forEach((text) => {
       if (text.startsWith("**")) {
-        generatedISIRows += `<tr>\n\t<td width="${gutterWidth ? gutterWidth : "30px"}" class="gutter">&nbsp;</td>\n\t<td align="left" style="font-family: Arial, Helvetica, sans-serif; font-size: ${fontSize ? fontSize : "12px"}; line-height: ${lineHeight ? lineHeight : "16px"}; color: ${fontColor ? fontColor : "#000000"}; padding-bottom: ${padding ? padding : "10px"};font-weight: bold;">\n\t\t${text.substring(2)}\n\t</td>\n\t<td width="${gutterWidth ? gutterWidth : "30px"}" class="gutter">&nbsp;</td>\n</tr>\n`;
+        generatedISIRows += `<tr>\n\t<td width="${gutterWidth ? gutterWidth + "px" : "30px"}" class="gutter">&nbsp;</td>\n\t<td align="left" style="font-family: Arial, Helvetica, sans-serif; font-size: ${fontSize ? fontSize : "12px"}; line-height: ${lineHeight ? lineHeight + "px" : "16px"}; color: ${fontColor ? fontColor : "#000000"}; padding-bottom: ${padding ? padding + "px" : "10px"};font-weight: bold;">\n\t\t${text.substring(2)}\n\t</td>\n\t<td width="${gutterWidth ? gutterWidth + "px" : "30px"}" class="gutter">&nbsp;</td>\n</tr>\n`;
       }
 
       if (text.startsWith("-")) {
-        generatedISIRows += `<tr>\n\t<td width="${gutterWidth ? gutterWidth : "30px"}" class="gutter">&nbsp;</td>\n\t<td align="left" style="font-family: Arial, Helvetica, sans-serif; font-size: ${fontSize ? fontSize : "12px"}; line-height: ${lineHeight ? lineHeight : "16px"}; color: ${fontColor ? fontColor : "#000000"}; padding-bottom: ${padding ? padding : "10px"};font-weight: normal;">\n\t\t<table cellpadding="0" cellspacing="0" border="0" width="100%">\n\t\t\t<tr>\n\t\t\t\t<td width="12" valign="top" align="left" style="font-family: sans-serif; font-size: ${fontSize ? fontSize : "12px"}; line-height: ${lineHeight ? lineHeight : "16px"}; color: #000000; font-weight: bold; padding-bottom: ${padding ? padding : "10px"};">&bull;</td>\n\t\t\t\t<td width="12" valign="top" align="left" style="font-family: sans-serif; font-size: ${fontSize ? fontSize : "12px"}; line-height: ${lineHeight ? lineHeight : "16px"}; color: #000000; font-weight: bold; padding-bottom: ${padding ? padding : "10px"};">${text.substring(1)}</td>\n\t\t\t</tr>\n\t\t</table>\n\t</td>\n\t<td width="${gutterWidth ? gutterWidth : "30px"}" class="gutter">&nbsp;</td>\n</tr>\n`;
+        generatedISIRows += `<tr>\n\t<td width="${gutterWidth ? gutterWidth + "px" : "30px"}" class="gutter">&nbsp;</td>\n\t<td align="left" style="font-family: Arial, Helvetica, sans-serif; font-size: ${fontSize ? fontSize + "px" : "12px"}; line-height: ${lineHeight ? lineHeight + "px" : "16px"}; color: ${fontColor ? fontColor : "#000000"}; padding-bottom: ${padding ? padding + "px" : "10px"};font-weight: normal;">\n\t\t<table cellpadding="0" cellspacing="0" border="0" width="100%">\n\t\t\t<tr>\n\t\t\t\t<td width="12" valign="top" align="left" style="font-family: sans-serif; font-size: ${fontSize ? fontSize + "px" : "12px"}; line-height: ${lineHeight ? lineHeight + "px" : "16px"}; color: #000000; font-weight: bold; padding-bottom: ${padding ? padding + "px" : "10px"};">&bull;</td>\n\t\t\t\t<td width="12" valign="top" align="left" style="font-family: sans-serif; font-size: ${fontSize ? fontSize + "px" : "12px"}; line-height: ${lineHeight ? lineHeight + "px" : "16px"}; color: #000000; font-weight: bold; padding-bottom: ${padding ? padding + "px" : "10px"};">${text.substring(1)}</td>\n\t\t\t</tr>\n\t\t</table>\n\t</td>\n\t<td width="${gutterWidth ? gutterWidth + "px" : "30px"}" class="gutter">&nbsp;</td>\n</tr>\n`;
       }
 
       if (!text.startsWith("**") && !text.startsWith("-")) {
-        generatedISIRows += `<tr>\n\t<td width="${gutterWidth ? gutterWidth : "30px"}" class="gutter">&nbsp;</td>\n\t<td align="left" style="font-family: Arial, Helvetica, sans-serif; font-size: ${fontSize ? fontSize : "12px"}; line-height: ${lineHeight ? lineHeight : "16px"}; color: ${fontColor ? fontColor : "#000000"}; padding-bottom: ${padding ? padding : "10px"};font-weight: normal;">\n\t\t${text}\n\t</td>\n\t<td width="${gutterWidth ? gutterWidth : "30px"}" class="gutter">&nbsp;</td>\n</tr>\n`;
+        generatedISIRows += `<tr>\n\t<td width="${gutterWidth ? gutterWidth + "px" : "30px"}" class="gutter">&nbsp;</td>\n\t<td align="left" style="font-family: Arial, Helvetica, sans-serif; font-size: ${fontSize ? fontSize + "px" : "12px"}; line-height: ${lineHeight ? lineHeight + "px" : "16px"}; color: ${fontColor ? fontColor : "#000000"}; padding-bottom: ${padding ? padding + "px" : "10px"};font-weight: normal;">\n\t\t${text}\n\t</td>\n\t<td width="${gutterWidth ? gutterWidth + "px" : "30px"}" class="gutter">&nbsp;</td>\n</tr>\n`;
       }
     });
 
@@ -81,8 +107,9 @@ function App() {
             ISI Generator
           </h1>
 
-          <h3 className="mb-3 font-thin text-foreground">
-            (**) - Text with font weight set as <strong>bold</strong>.
+          <h3 className="mb-3 text-center font-light text-foreground">
+            Below you can generate an ISI code just copying and pasting <br /> a
+            normal text with break lines
           </h3>
 
           <div className="flex w-full flex-col justify-center gap-6 md:flex-row">
@@ -98,6 +125,11 @@ function App() {
                   id="padding"
                   {...register("padding")}
                 />
+                {errors.padding && (
+                  <p className="text-sm font-light text-red-500">
+                    {errors.padding.message}
+                  </p>
+                )}
               </div>
 
               <div className="mb-3 space-y-1 md:mb-0 md:space-y-2">
@@ -108,6 +140,11 @@ function App() {
                   id="font-size"
                   {...register("fontSize")}
                 />
+                {errors.fontSize && (
+                  <p className="text-sm font-light text-red-500">
+                    {errors.fontSize.message}
+                  </p>
+                )}
               </div>
 
               <div className="mb-3 space-y-1 md:mb-0 md:space-y-2">
@@ -118,6 +155,11 @@ function App() {
                   id="font-color"
                   {...register("fontColor")}
                 />
+                {errors.fontColor && (
+                  <p className="text-sm font-light text-red-500">
+                    {errors.fontColor.message}
+                  </p>
+                )}
               </div>
 
               <div className="mb-3 space-y-1 md:mb-0 md:space-y-2">
@@ -128,6 +170,11 @@ function App() {
                   id="line-height"
                   {...register("lineHeight")}
                 />
+                {errors.lineHeight && (
+                  <p className="text-sm font-light text-red-500">
+                    {errors.lineHeight.message}
+                  </p>
+                )}
               </div>
 
               <div className="mb-3 space-y-1 md:mb-0 md:space-y-2">
@@ -138,6 +185,11 @@ function App() {
                   id="gutter-width"
                   {...register("gutterWidth")}
                 />
+                {errors.gutterWidth && (
+                  <p className="text-sm font-light text-red-500">
+                    {errors.gutterWidth.message}
+                  </p>
+                )}
               </div>
 
               <div className="col-span-2 space-y-1 md:space-y-2">
@@ -145,11 +197,10 @@ function App() {
                 <Textarea
                   className="min-h-60 resize-none scrollbar scrollbar-track-transparent scrollbar-thumb-slate-800"
                   {...register("ISI")}
-                  required
                 />
               </div>
 
-              <Button className="col-span-2 mt-3" variant="secondary">
+              <Button className="col-span-2 mt-3 w-full" variant="secondary">
                 Generate your HTML code
               </Button>
             </form>
