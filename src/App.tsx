@@ -6,7 +6,7 @@ import { Input } from "./components/ui/input";
 import { Label } from "./components/ui/label";
 import { Textarea } from "./components/ui/textarea";
 import { useState } from "react";
-import { ClipboardCheck, ClipboardList } from "lucide-react";
+import { ClipboardCheck, ClipboardList, CodeXml } from "lucide-react";
 import { useToast } from "./components/ui/use-toast";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,15 +18,9 @@ const ISIValuesSchema = z.object({
   fontSize: z.coerce
     .number({ message: "Font size needs to be a number" })
     .optional(),
-  fontColor: z
-    .string()
-    .regex(
-      /^(#[a-f0-9]{6}|#[a-f0-9]{3}|rgb *\( *[0-9]{1,3}%? *, *[0-9]{1,3}%? *, *[0-9]{1,3}%? *\)|rgba *\( *[0-9]{1,3}%? *, *[0-9]{1,3}%? *, *[0-9]{1,3}%? *, *[0-9]{1,3}%? *\)|black|green|silver|gray|olive|white|yellow|maroon|navy|red|blue|purple|teal|fuchsia|aqua)$/i,
-      {
-        message: "Font color needs to be a valid color.",
-      },
-    )
-    .optional(),
+  fontColor: z.string().regex(/^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})?$|^$/i, {
+    message: "Font color needs to be a valid color.",
+  }),
   lineHeight: z.coerce
     .number({ message: "Line height needs to be a number" })
     .optional(),
@@ -200,7 +194,12 @@ function App() {
                 />
               </div>
 
-              <Button className="col-span-2 mt-3 w-full" variant="secondary">
+              <Button
+                type="submit"
+                className="col-span-2 mt-2 w-full"
+                variant="secondary"
+              >
+                <CodeXml className="mr-2" />
                 Generate your HTML code
               </Button>
             </form>
