@@ -71,10 +71,10 @@ function App() {
       const commonStyle = `font-family: Arial, Helvetica, sans-serif; font-size: ${fontSizeValue}; line-height: ${lineHeightValue}; color: ${fontColorValue}; padding-bottom: ${paddingValue}; font-weight: ${isBold ? "bold;" : "normal;"}`;
 
       if (isBullet) {
-        text = `\n\t\t\t<table cellpadding="0" cellspacing="0" border="0" width="100%">\n\t\t\t\t<tr>\n\t\t\t\t\t<td width="12" valign="top" align="left" style="${commonStyle} font-weight: bold;">&bull;</td>\n\t\t\t\t\t<td valign="top" align="left" style="${commonStyle}">${text}</td>\n\t\t\t\t</tr>\n\t\t\t</table>\n\t\t`;
+        text = `<table cellpadding="0" cellspacing="0" border="0" width="100%">\n\t\t\t\t<tr>\n\t\t\t\t\t<td width="12" valign="top" align="left" style="${commonStyle} font-weight: bold;">&bull;</td>\n\t\t\t\t\t<td valign="top" align="left" style="${commonStyle}">${text}</td>\n\t\t\t\t</tr>\n\t\t\t</table>`;
       }
 
-      return `<table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="${tableColorValue}">\n\t<tr>\n\t\t<td width="${gutterWidthValue}" class="gutter">&nbsp;</td>\n\t\t<td align="left" style="${commonStyle}">\n\t\t\t${text}\n\t\t</td>\n\t\t<td width="${gutterWidthValue}" class="gutter">&nbsp;</td>\n\t</tr>\n</table>\n`;
+      return `<table cellpadding="0" cellspacing="0" border="0" width="600" style="min-width: 600px;" class="wrapper" role="presentation" bgcolor="${tableColorValue}">\n\t<tr>\n\t\t<td width="${gutterWidthValue}" class="gutter">&nbsp;</td>\n\t\t<td align="left" style="${commonStyle}">\n\t\t\t${text}\n\t\t</td>\n\t\t<td width="${gutterWidthValue}" class="gutter">&nbsp;</td>\n\t</tr>\n</table>\n`;
     };
 
     const generatedISIRows = ISI.split(/\r?\n|\r/)
