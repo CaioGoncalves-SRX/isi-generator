@@ -18,8 +18,11 @@ const ISIValuesSchema = z.object({
   fontSize: z.coerce
     .number({ message: "Font size needs to be a number" })
     .optional(),
-  fontColor: z.string().regex(/^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})?$|^$/i, {
-    message: "Font color needs to be a valid color.",
+  fontColor: z.string().regex(/^(#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3}))$|^$/i, {
+    message: "Font color needs to be a valid hex color",
+  }),
+  tableColor: z.string().regex(/^(#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3}))$|^$/i, {
+    message: "Table color needs to be a valid hex color",
   }),
   lineHeight: z.coerce
     .number({ message: "Line height needs to be a number" })
@@ -27,7 +30,7 @@ const ISIValuesSchema = z.object({
   gutterWidth: z.coerce
     .number({ message: "Gutter needs to be a number" })
     .optional(),
-  ISI: z.string().min(1),
+  ISI: z.string().min(1, { message: "ISI text is required" }),
 });
 
 type ISIValues = z.infer<typeof ISIValuesSchema>;
@@ -48,26 +51,41 @@ function App() {
     padding,
     fontSize,
     fontColor,
+    tableColor,
     lineHeight,
     gutterWidth,
     ISI,
   }: ISIValues) {
-    let generatedISIRows = "";
-    const splittedISIText = ISI.split(/\r?\n|\r/);
+    const generateRow = (
+      text: string,
+      isBold: boolean = false,
+      isBullet: boolean = false,
+    ) => {
+      const paddingValue = padding ? padding + "px" : "10px";
+      const fontSizeValue = fontSize ? fontSize + "px" : "16px";
+      const fontColorValue = fontColor ? fontColor : "#000000";
+      const lineHeightValue = lineHeight ? lineHeight + "px" : "16px";
+      const gutterWidthValue = gutterWidth ? gutterWidth + "px" : "30px";
+      const tableColorValue = tableColor ? tableColor : "#FFFFFE";
 
-    splittedISIText.forEach((text) => {
-      if (text.startsWith("**")) {
-        generatedISIRows += `<tr>\n\t<td width="${gutterWidth ? gutterWidth + "px" : "30px"}" class="gutter">&nbsp;</td>\n\t<td align="left" style="font-family: Arial, Helvetica, sans-serif; font-size: ${fontSize ? fontSize : "12px"}; line-height: ${lineHeight ? lineHeight + "px" : "16px"}; color: ${fontColor ? fontColor : "#000000"}; padding-bottom: ${padding ? padding + "px" : "10px"};font-weight: bold;">\n\t\t${text.substring(2)}\n\t</td>\n\t<td width="${gutterWidth ? gutterWidth + "px" : "30px"}" class="gutter">&nbsp;</td>\n</tr>\n`;
+      const commonStyle = `font-family: Arial, Helvetica, sans-serif; font-size: ${fontSizeValue}; line-height: ${lineHeightValue}; color: ${fontColorValue}; padding-bottom: ${paddingValue}; font-weight: ${isBold ? "bold;" : "normal;"}`;
+
+      if (isBullet) {
+        text = `\n\t\t\t<table cellpadding="0" cellspacing="0" border="0" width="100%">\n\t\t\t\t<tr>\n\t\t\t\t\t<td width="12" valign="top" align="left" style="${commonStyle} font-weight: bold;">&bull;</td>\n\t\t\t\t\t<td valign="top" align="left" style="${commonStyle}">${text}</td>\n\t\t\t\t</tr>\n\t\t\t</table>\n\t\t`;
       }
 
-      if (text.startsWith("-")) {
-        generatedISIRows += `<tr>\n\t<td width="${gutterWidth ? gutterWidth + "px" : "30px"}" class="gutter">&nbsp;</td>\n\t<td align="left" style="font-family: Arial, Helvetica, sans-serif; font-size: ${fontSize ? fontSize + "px" : "12px"}; line-height: ${lineHeight ? lineHeight + "px" : "16px"}; color: ${fontColor ? fontColor : "#000000"}; padding-bottom: ${padding ? padding + "px" : "10px"};font-weight: normal;">\n\t\t<table cellpadding="0" cellspacing="0" border="0" width="100%">\n\t\t\t<tr>\n\t\t\t\t<td width="12" valign="top" align="left" style="font-family: sans-serif; font-size: ${fontSize ? fontSize + "px" : "12px"}; line-height: ${lineHeight ? lineHeight + "px" : "16px"}; color: #000000; font-weight: bold; padding-bottom: ${padding ? padding + "px" : "10px"};">&bull;</td>\n\t\t\t\t<td width="12" valign="top" align="left" style="font-family: sans-serif; font-size: ${fontSize ? fontSize + "px" : "12px"}; line-height: ${lineHeight ? lineHeight + "px" : "16px"}; color: #000000; font-weight: bold; padding-bottom: ${padding ? padding + "px" : "10px"};">${text.substring(1)}</td>\n\t\t\t</tr>\n\t\t</table>\n\t</td>\n\t<td width="${gutterWidth ? gutterWidth + "px" : "30px"}" class="gutter">&nbsp;</td>\n</tr>\n`;
-      }
+      return `<table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="${tableColorValue}">\n\t<tr>\n\t\t<td width="${gutterWidthValue}" class="gutter">&nbsp;</td>\n\t\t<td align="left" style="${commonStyle}">\n\t\t\t${text}\n\t\t</td>\n\t\t<td width="${gutterWidthValue}" class="gutter">&nbsp;</td>\n\t</tr>\n</table>\n`;
+    };
 
-      if (!text.startsWith("**") && !text.startsWith("-")) {
-        generatedISIRows += `<tr>\n\t<td width="${gutterWidth ? gutterWidth + "px" : "30px"}" class="gutter">&nbsp;</td>\n\t<td align="left" style="font-family: Arial, Helvetica, sans-serif; font-size: ${fontSize ? fontSize + "px" : "12px"}; line-height: ${lineHeight ? lineHeight + "px" : "16px"}; color: ${fontColor ? fontColor : "#000000"}; padding-bottom: ${padding ? padding + "px" : "10px"};font-weight: normal;">\n\t\t${text}\n\t</td>\n\t<td width="${gutterWidth ? gutterWidth + "px" : "30px"}" class="gutter">&nbsp;</td>\n</tr>\n`;
-      }
-    });
+    const generatedISIRows = ISI.split(/\r?\n|\r/)
+      .filter((row) => row.length > 0)
+      .map((text) => {
+        if (text.startsWith("**")) return generateRow(text.substring(2), true);
+        if (text.startsWith("-"))
+          return generateRow(text.substring(1), false, true);
+        return generateRow(text);
+      })
+      .join("");
 
     setIsClipboardWritten(false);
     setGeneratedISI(generatedISIRows);
@@ -111,7 +129,7 @@ function App() {
               className="gap-2 md:grid md:w-1/2 md:grid-cols-2"
               onSubmit={handleSubmit(handleISIValues)}
             >
-              <div className="col-span-2 mb-3 space-y-1 md:mb-0 md:space-y-2">
+              <div className="mb-3 space-y-1 md:mb-0 md:space-y-2">
                 <Label htmlFor="padding">Padding between lines (px)</Label>
                 <Input
                   type="text"
@@ -120,8 +138,23 @@ function App() {
                   {...register("padding")}
                 />
                 {errors.padding && (
-                  <p className="text-sm font-light text-red-500">
+                  <p className="text-sm font-medium text-red-500 dark:font-light">
                     {errors.padding.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="mb-3 space-y-1 md:mb-0 md:space-y-2">
+                <Label htmlFor="table-color">Table color (#)</Label>
+                <Input
+                  type="text"
+                  placeholder="Default: #FFFFFE"
+                  id="table-color"
+                  {...register("tableColor")}
+                />
+                {errors.tableColor && (
+                  <p className="text-sm font-medium text-red-500 dark:font-light">
+                    {errors.tableColor.message}
                   </p>
                 )}
               </div>
@@ -135,7 +168,7 @@ function App() {
                   {...register("fontSize")}
                 />
                 {errors.fontSize && (
-                  <p className="text-sm font-light text-red-500">
+                  <p className="text-sm font-medium text-red-500 dark:font-light">
                     {errors.fontSize.message}
                   </p>
                 )}
@@ -150,7 +183,7 @@ function App() {
                   {...register("fontColor")}
                 />
                 {errors.fontColor && (
-                  <p className="text-sm font-light text-red-500">
+                  <p className="text-sm font-medium text-red-500 dark:font-light">
                     {errors.fontColor.message}
                   </p>
                 )}
@@ -165,7 +198,7 @@ function App() {
                   {...register("lineHeight")}
                 />
                 {errors.lineHeight && (
-                  <p className="text-sm font-light text-red-500">
+                  <p className="text-sm font-medium text-red-500 dark:font-light">
                     {errors.lineHeight.message}
                   </p>
                 )}
@@ -180,7 +213,7 @@ function App() {
                   {...register("gutterWidth")}
                 />
                 {errors.gutterWidth && (
-                  <p className="text-sm font-light text-red-500">
+                  <p className="text-sm font-medium text-red-500 dark:font-light">
                     {errors.gutterWidth.message}
                   </p>
                 )}
@@ -192,6 +225,11 @@ function App() {
                   className="min-h-60 resize-none scrollbar scrollbar-track-transparent scrollbar-thumb-slate-800"
                   {...register("ISI")}
                 />
+                {errors.ISI && (
+                  <p className="text-sm font-medium text-red-500 dark:font-light">
+                    {errors.ISI.message}
+                  </p>
+                )}
               </div>
 
               <Button
@@ -209,13 +247,13 @@ function App() {
                 <Button
                   size="icon"
                   variant="outline"
-                  className="absolute right-2 top-2 md:right-6"
+                  className="absolute left-2 top-2"
                   onClick={copyTextToClipboard}
                   title="Copy to clipboard"
                 >
                   {isClipboardWritten ? <ClipboardCheck /> : <ClipboardList />}
                 </Button>
-                <div className="overflow-y-auto rounded-md border-2 p-4 pt-8 scrollbar scrollbar-track-transparent scrollbar-thumb-zinc-800 md:pt-6">
+                <div className="overflow-y-auto rounded-md border-2 p-4 pt-8 scrollbar scrollbar-track-transparent scrollbar-thumb-zinc-800 md:pt-14">
                   <pre className="text-xs">{generatedISI}</pre>
                 </div>
               </div>
