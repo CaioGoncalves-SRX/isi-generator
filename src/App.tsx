@@ -65,30 +65,33 @@ function App() {
       const fontSizeValue = fontSize ? fontSize + "px" : "16px";
       const fontColorValue = fontColor ? fontColor : "#000000";
       const lineHeightValue = lineHeight ? lineHeight + "px" : "16px";
-      const gutterWidthValue = gutterWidth ? gutterWidth + "px" : "30px";
-      const tableColorValue = tableColor ? tableColor : "#FFFFFE";
 
       const commonStyle = `font-family: Arial, Helvetica, sans-serif; font-size: ${fontSizeValue}; line-height: ${lineHeightValue}; color: ${fontColorValue}; padding-bottom: ${paddingValue}; font-weight: ${isBold ? "bold;" : "normal;"}`;
 
       if (isBullet) {
-        text = `<table cellpadding="0" cellspacing="0" border="0" width="100%">\n\t\t\t\t<tr>\n\t\t\t\t\t<td width="12" valign="top" align="left" style="${commonStyle} font-weight: bold;">&bull;</td>\n\t\t\t\t\t<td valign="top" align="left" style="${commonStyle}">${text}</td>\n\t\t\t\t</tr>\n\t\t\t</table>`;
+        return (text = `\n\t\t\t\t<tr>\n\t\t\t\t\t<td>\n\t\t\t\t\t\t<table cellpadding="0" cellspacing="0" border="0" width="100%">\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td width="12" valign="top" align="left" style="${commonStyle} font-weight: bold;">&bull;</td>\n\t\t\t\t\t\t\t\t<td valign="top" align="left" style="${commonStyle}">${text}</td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</table>\n\t\t\t\t\t</td>\n\t\t\t\t</tr>`);
       }
 
-      return `<table cellpadding="0" cellspacing="0" border="0" width="600" style="min-width: 600px;" class="wrapper" role="presentation" bgcolor="${tableColorValue}">\n\t<tr>\n\t\t<td width="${gutterWidthValue}" class="gutter">&nbsp;</td>\n\t\t<td align="left" style="${commonStyle}">\n\t\t\t${text}\n\t\t</td>\n\t\t<td width="${gutterWidthValue}" class="gutter">&nbsp;</td>\n\t</tr>\n</table>\n`;
+      return `\n\t\t\t\t<tr>\n\t\t\t\t\t<td align="left" style="${commonStyle}">\n\t\t\t\t\t\t${text}\n\t\t\t\t\t</td>\n\t\t\t\t</tr>`;
     };
 
     const generatedISIRows = ISI.split(/\r?\n|\r/)
       .filter((row) => row.length > 0)
       .map((text) => {
         if (text.startsWith("**")) return generateRow(text.substring(2), true);
-        if (text.startsWith("-"))
-          return generateRow(text.substring(1), false, true);
+        // prettier-ignore
+        if (text.startsWith("-")) return generateRow(text.substring(1), false, true);
         return generateRow(text);
       })
       .join("");
 
+    const gutterWidthValue = gutterWidth ? gutterWidth + "px" : "30px";
+    const tableColorValue = tableColor ? tableColor : "#FFFFFE";
+
+    const generatedISI = `<table cellpadding="0" cellspacing="0" border="0" width="600" style="min-width: 600px;" class="wrapper" role="presentation" bgcolor="${tableColorValue}">\n\t<tr>\n\t\t<td width="${gutterWidthValue}" class="gutter">&nbsp;</td>\n\t\t<td>\n\t\t\t<table cellpadding="0" cellspacing="0" border="0" width="100%">${generatedISIRows}\n\t\t\t</table>\n\t\t</td>\n\t\t<td width="${gutterWidthValue}" class="gutter">&nbsp;</td>\n\t</tr>\n</table>`;
+
     setIsClipboardWritten(false);
-    setGeneratedISI(generatedISIRows);
+    setGeneratedISI(generatedISI);
   }
 
   function copyTextToClipboard() {
