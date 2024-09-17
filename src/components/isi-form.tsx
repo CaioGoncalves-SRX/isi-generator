@@ -1,11 +1,19 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { CodeXml } from "lucide-react";
 import { Button } from "./ui/button";
+import { Switch } from "./ui/switch";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "./ui/form";
 
 const ISIValuesSchema = z.object({
   padding: z.coerce
@@ -14,12 +22,18 @@ const ISIValuesSchema = z.object({
   fontSize: z.coerce
     .number({ message: "Font size needs to be a number" })
     .optional(),
-  fontColor: z.string().regex(/^(#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3}))$|^$/i, {
-    message: "Font color needs to be a valid hex color",
-  }),
-  tableColor: z.string().regex(/^(#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3}))$|^$/i, {
-    message: "Table color needs to be a valid hex color",
-  }),
+  fontColor: z
+    .string()
+    .regex(/^(#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3}))$|^$/i, {
+      message: "Font color needs to be a valid hex color",
+    })
+    .optional(),
+  tableColor: z
+    .string()
+    .regex(/^(#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3}))$|^$/i, {
+      message: "Table color needs to be a valid hex color",
+    })
+    .optional(),
   lineHeight: z.coerce
     .number({ message: "Line height needs to be a number" })
     .optional(),
@@ -27,6 +41,13 @@ const ISIValuesSchema = z.object({
     .number({ message: "Gutter needs to be a number" })
     .optional(),
   ISI: z.string().min(1, { message: "ISI text is required" }),
+  hasBullets: z.boolean().optional(),
+  bulletColor: z
+    .string()
+    .regex(/^(#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3}))$|^$/i, {
+      message: "Bullet color needs to be a valid hex color",
+    })
+    .optional(),
 });
 
 type ISIValues = z.infer<typeof ISIValuesSchema>;
@@ -39,12 +60,19 @@ export default function ISIForm({
   setGeneratedISI,
   setIsClipboardWritten,
 }: ISIFormProps) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<ISIValues>({
+  const form = useForm<ISIValues>({
     resolver: zodResolver(ISIValuesSchema),
+    defaultValues: {
+      padding: 10,
+      fontSize: 16,
+      fontColor: "#000000",
+      tableColor: "#FFFFFE",
+      lineHeight: 16,
+      gutterWidth: 30,
+      ISI: "",
+      hasBullets: false,
+      bulletColor: "#000000",
+    },
   });
 
   function handleISIValues({
@@ -55,21 +83,17 @@ export default function ISIForm({
     lineHeight,
     gutterWidth,
     ISI,
+    bulletColor,
   }: ISIValues) {
     const generateRow = (
       text: string,
       isBold: boolean = false,
       isBullet: boolean = false,
     ) => {
-      const paddingValue = padding ? padding + "px" : "10px";
-      const fontSizeValue = fontSize ? fontSize + "px" : "16px";
-      const fontColorValue = fontColor ? fontColor : "#000000";
-      const lineHeightValue = lineHeight ? lineHeight + "px" : "16px";
-
-      const commonStyle = `font-family: Arial, Helvetica, sans-serif; font-size: ${fontSizeValue}; line-height: ${lineHeightValue}; color: ${fontColorValue}; padding-bottom: ${paddingValue}; font-weight: ${isBold ? "bold;" : "normal;"}`;
+      const commonStyle = `font-family: Arial, Helvetica, sans-serif; font-size: ${fontSize}px; line-height: ${lineHeight}px; color: ${fontColor}; padding-bottom: ${padding}px; font-weight: ${isBold ? "bold;" : "normal;"}`;
 
       if (isBullet) {
-        return (text = `\n\t\t\t\t<tr>\n\t\t\t\t\t<td>\n\t\t\t\t\t\t<table cellpadding="0" cellspacing="0" border="0" width="100%">\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td width="12" valign="top" align="left" style="${commonStyle} font-weight: bold;">&bull;</td>\n\t\t\t\t\t\t\t\t<td valign="top" align="left" style="${commonStyle}">${text}</td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</table>\n\t\t\t\t\t</td>\n\t\t\t\t</tr>`);
+        return (text = `\n\t\t\t\t<tr>\n\t\t\t\t\t<td>\n\t\t\t\t\t\t<table cellpadding="0" cellspacing="0" border="0" width="100%">\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td width="12" valign="top" align="left" style="font-family: Arial, Helvetica, sans-serif; font-size: ${fontSize}px; line-height: ${lineHeight}px; color: ${bulletColor}; padding-bottom: ${padding}px; font-weight: bold;">&bull;</td>\n\t\t\t\t\t\t\t\t<td valign="top" align="left" style="${commonStyle}">${text}</td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</table>\n\t\t\t\t\t</td>\n\t\t\t\t</tr>`);
       }
 
       return `\n\t\t\t\t<tr>\n\t\t\t\t\t<td align="left" style="${commonStyle}">\n\t\t\t\t\t\t${text}\n\t\t\t\t\t</td>\n\t\t\t\t</tr>`;
@@ -94,121 +118,197 @@ export default function ISIForm({
     setGeneratedISI(generatedISI);
   }
   return (
-    <form
-      className="gap-2 md:grid md:w-1/2 md:grid-cols-2"
-      onSubmit={handleSubmit(handleISIValues)}
-    >
-      <div className="mb-3 space-y-1 md:mb-0 md:space-y-2">
-        <Label htmlFor="padding">Padding between lines (px)</Label>
-        <Input
-          type="text"
-          placeholder="Default: 10px"
-          id="padding"
-          {...register("padding")}
-        />
-        {errors.padding && (
-          <p className="text-sm font-medium text-red-500 dark:font-light">
-            {errors.padding.message}
-          </p>
-        )}
-      </div>
-
-      <div className="mb-3 space-y-1 md:mb-0 md:space-y-2">
-        <Label htmlFor="table-color">Table color (#)</Label>
-        <Input
-          type="text"
-          placeholder="Default: #FFFFFE"
-          id="table-color"
-          {...register("tableColor")}
-        />
-        {errors.tableColor && (
-          <p className="text-sm font-medium text-red-500 dark:font-light">
-            {errors.tableColor.message}
-          </p>
-        )}
-      </div>
-
-      <div className="mb-3 space-y-1 md:mb-0 md:space-y-2">
-        <Label htmlFor="font-size">Font size (px)</Label>
-        <Input
-          type="text"
-          placeholder="Default: 12px"
-          id="font-size"
-          {...register("fontSize")}
-        />
-        {errors.fontSize && (
-          <p className="text-sm font-medium text-red-500 dark:font-light">
-            {errors.fontSize.message}
-          </p>
-        )}
-      </div>
-
-      <div className="mb-3 space-y-1 md:mb-0 md:space-y-2">
-        <Label htmlFor="font-color">Font color (#)</Label>
-        <Input
-          type="text"
-          placeholder="Default: #000000"
-          id="font-color"
-          {...register("fontColor")}
-        />
-        {errors.fontColor && (
-          <p className="text-sm font-medium text-red-500 dark:font-light">
-            {errors.fontColor.message}
-          </p>
-        )}
-      </div>
-
-      <div className="mb-3 space-y-1 md:mb-0 md:space-y-2">
-        <Label htmlFor="line-height">Line height (px)</Label>
-        <Input
-          type="text"
-          placeholder="Default: 16px"
-          id="line-height"
-          {...register("lineHeight")}
-        />
-        {errors.lineHeight && (
-          <p className="text-sm font-medium text-red-500 dark:font-light">
-            {errors.lineHeight.message}
-          </p>
-        )}
-      </div>
-
-      <div className="mb-3 space-y-1 md:mb-0 md:space-y-2">
-        <Label htmlFor="gutter-width">Gutter width (px)</Label>
-        <Input
-          type="text"
-          placeholder="Default: 30px"
-          id="gutter-width"
-          {...register("gutterWidth")}
-        />
-        {errors.gutterWidth && (
-          <p className="text-sm font-medium text-red-500 dark:font-light">
-            {errors.gutterWidth.message}
-          </p>
-        )}
-      </div>
-
-      <div className="col-span-2 space-y-1 md:space-y-2">
-        <Label htmlFor="line-height">Your ISI text</Label>
-        <Textarea
-          className="min-h-60 resize-none scrollbar scrollbar-track-transparent scrollbar-thumb-slate-800"
-          {...register("ISI")}
-        />
-        {errors.ISI && (
-          <p className="text-sm font-medium text-red-500 dark:font-light">
-            {errors.ISI.message}
-          </p>
-        )}
-      </div>
-
-      <Button
-        type="submit"
-        className="col-span-2 mt-2 w-full"
-        variant="secondary"
+    <Form {...form}>
+      <form
+        className="space-y-3 md:grid md:w-1/2 md:grid-cols-2 md:gap-3 md:space-y-0"
+        onSubmit={form.handleSubmit(handleISIValues)}
       >
-        <CodeXml className="mr-2" />
-        Generate your HTML code
-      </Button>
-    </form>
+        <FormField
+          control={form.control}
+          name="padding"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel htmlFor="padding">
+                Padding between lines (px)
+              </FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  placeholder="Default: 10px"
+                  id="padding"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="tableColor"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel htmlFor="table-color">Table color (#)</FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  placeholder="Default: #FFFFFE"
+                  id="table-color"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="fontSize"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel htmlFor="font-size">Font size (px)</FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  placeholder="Default: 12px"
+                  id="font-size"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="fontColor"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel htmlFor="font-color">Font color (#)</FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  placeholder="Default: #000000"
+                  id="font-color"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="lineHeight"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel htmlFor="line-height">Line height (px)</FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  placeholder="Default: 16px"
+                  id="line-height"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="gutterWidth"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel htmlFor="gutter-width">Gutter width (px)</FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  placeholder="Default: 30px"
+                  id="gutter-width"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="hasBullets"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center space-x-4">
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  id="hasBullets"
+                />
+              </FormControl>
+              <FormLabel className="!mt-0" htmlFor="hasBullets">
+                Change ISI bullets color
+              </FormLabel>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="bulletColor"
+          render={({ field }) => (
+            <FormItem>
+              {/* <FormLabel
+                htmlFor="bullet-color"
+                className={`${!form.getValues("hasBullets") ? "text-zinc-800" : "text-white"}`}
+              >
+                Bullet color (#)
+              </FormLabel> */}
+              <FormControl>
+                <Input
+                  type="text"
+                  placeholder="Default: #000000"
+                  id="bullet-color"
+                  disabled={!form.getValues("hasBullets")}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="ISI"
+          render={({ field }) => (
+            <FormItem className="col-span-2">
+              <FormLabel htmlFor="ISI">Your ISI text</FormLabel>
+              <FormControl>
+                <Textarea
+                  className="min-h-60 resize-none scrollbar scrollbar-track-transparent scrollbar-thumb-slate-800"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Button
+          type="submit"
+          className="col-span-2 mt-2 w-full"
+          variant="secondary"
+        >
+          <CodeXml className="mr-2" />
+          Generate your HTML code
+        </Button>
+      </form>
+    </Form>
   );
 }

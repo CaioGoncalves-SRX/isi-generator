@@ -52,7 +52,7 @@ function App() {
             />
 
             {generatedISI && (
-              <div className="relative flex max-h-[580px] md:w-1/2">
+              <div className="relative flex max-h-[635px] md:w-1/2">
                 <Button
                   size="icon"
                   variant="outline"
