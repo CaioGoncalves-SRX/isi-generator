@@ -109,7 +109,7 @@ export default function ISIForm({
       })
       .join("");
 
-    const gutterWidthValue = gutterWidth ? gutterWidth + "px" : "30px";
+    const gutterWidthValue = gutterWidth ? gutterWidth : "30px";
     const tableColorValue = tableColor ? tableColor : "#FFFFFE";
 
     const generatedISI = `<table cellpadding="0" cellspacing="0" border="0" width="600" style="min-width: 600px;" class="wrapper" role="presentation" bgcolor="${tableColorValue}">\n\t<tr>\n\t\t<td width="${gutterWidthValue}" class="gutter">&nbsp;</td>\n\t\t<td>\n\t\t\t<table cellpadding="0" cellspacing="0" border="0" width="100%">${generatedISIRows}\n\t\t\t</table>\n\t\t</td>\n\t\t<td width="${gutterWidthValue}" class="gutter">&nbsp;</td>\n\t</tr>\n</table>`;
