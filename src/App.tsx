@@ -5,6 +5,7 @@ import { useState } from "react";
 import { ClipboardCheck, ClipboardList } from "lucide-react";
 import { useToast } from "./components/ui/use-toast";
 import ISIForm from "./components/isi-form";
+import { TooltipProvider } from "./components/ui/tooltip";
 
 function App() {
   const [generatedISI, setGeneratedISI] = useState("");
@@ -30,7 +31,8 @@ function App() {
 
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <div className="flex min-h-screen flex-col items-center justify-center">
+      <TooltipProvider>
+        <div className="flex min-h-screen flex-col items-center justify-center">
         <div className="fixed right-2 top-2">
           <ModeToggle />
         </div>
@@ -70,6 +72,7 @@ function App() {
           </div>
         </div>
       </div>
+      </TooltipProvider>
     </ThemeProvider>
   );
 }

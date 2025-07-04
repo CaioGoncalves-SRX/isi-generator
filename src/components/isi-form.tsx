@@ -14,6 +14,11 @@ import {
   FormLabel,
   FormMessage,
 } from "./ui/form";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 const ISIValuesSchema = z.object({
   padding: z.coerce
@@ -289,6 +294,16 @@ export default function ISIForm({
           render={({ field }) => (
             <FormItem className="col-span-2">
               <FormLabel htmlFor="ISI">Your ISI text</FormLabel>
+              <Tooltip>
+                <TooltipTrigger asChild className="inline-block ml-1 text-slate-600 cursor-pointer">
+                  <p>(?)</p>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="mb-2">Insert the following symbols to format your text:</p>
+                  <p><strong>**</strong> Bold text</p>
+                  <p><strong>&ndash;</strong> Bullet point</p>
+                </TooltipContent>
+              </Tooltip>
               <FormControl>
                 <Textarea
                   className="min-h-60 resize-none scrollbar scrollbar-track-transparent scrollbar-thumb-slate-800"
