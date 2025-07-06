@@ -125,7 +125,7 @@ export default function ISIForm({
   return (
     <Form {...form}>
       <form
-        className="space-y-3 md:grid md:w-1/2 md:grid-cols-2 md:gap-3 md:space-y-0"
+        className="space-y-3 md:grid md:w-full md:grid-cols-2 md:gap-3 md:space-y-0"
         onSubmit={form.handleSubmit(handleISIValues)}
       >
         <FormField
